@@ -26,34 +26,49 @@ after_initialize do
   #   same_site: :none,
   #   secure: true
 
-  Rails.logger.info "Initializing Novalink Feedback plugin to modify security headers..."
-
-  # Monkey patch ApplicationController to add our headers
-  ::ApplicationController.class_eval do
-    # Store the original method reference
-    alias_method :orig_append_content_security_policy_header, :append_content_security_policy_header
-
-    # Override the method to add our custom policies
-    def append_content_security_policy_header
-      # Call original method first
-      orig_append_content_security_policy_header
-
-      # Add our custom frame-ancestors and default-src directives
-      response.headers["Content-Security-Policy"] = response.headers["Content-Security-Policy"].to_s.gsub(
+ # Use Discourse's event system to modify headers after each action
+ on(:before_send_headers) do |controller|
+  if controller.response.headers["Content-Security-Policy"].present?
+    # Modify existing Content-Security-Policy header
+    current_csp = controller.response.headers["Content-Security-Policy"]
+    
+    # Replace or add frame-ancestors directive
+    if current_csp.include?("frame-ancestors")
+      current_csp = current_csp.gsub(
         /frame-ancestors[^;]*;/,
         "frame-ancestors 'self' http://localhost http://localhost:5173;"
       )
-
-      if !response.headers["Content-Security-Policy"].to_s.include?("frame-ancestors")
-        response.headers["Content-Security-Policy"] = "#{response.headers["Content-Security-Policy"]} frame-ancestors 'self' http://localhost http://localhost:5173;"
-      end
-
-      # Set X-Frame-Options
-      response.headers["X-Frame-Options"] = "ALLOW-FROM http://localhost"
-
-      Rails.logger.debug "Modified security headers: #{response.headers["Content-Security-Policy"]}"
+    else
+      current_csp += " frame-ancestors 'self' http://localhost http://localhost:5173;"
     end
+
+    # Make sure default-src includes our domains
+    if current_csp.include?("default-src")
+      if !current_csp.include?("default-src") || 
+         !(current_csp.include?("http://localhost") && current_csp.include?("http://localhost:5173"))
+        # Add our domains to default-src if they're not already there
+        current_csp = current_csp.gsub(
+          /default-src([^;]*);/,
+          "default-src\\1 http://localhost http://localhost:5173;"
+        )
+      end
+    else
+      current_csp += " default-src 'self' http://localhost http://localhost:5173;"
+    end
+    
+    # Update the header
+    controller.response.headers["Content-Security-Policy"] = current_csp
+  else
+    # Set a new Content-Security-Policy header if none exists
+    controller.response.headers["Content-Security-Policy"] = 
+      "frame-ancestors 'self' http://localhost http://localhost:5173; default-src 'self' http://localhost http://localhost:5173;"
   end
 
-  Rails.logger.info "Novalink Feedback plugin initialized successfully"
+  # Always set X-Frame-Options
+  controller.response.headers["X-Frame-Options"] = "ALLOW-FROM http://localhost"
+  
+  Rails.logger.debug "Modified security headers: #{controller.response.headers["Content-Security-Policy"]}"
+end
+
+Rails.logger.info "Novalink Feedback plugin initialized successfully"
 end
