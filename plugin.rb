@@ -3,8 +3,8 @@ after_initialize do
     PLUGIN_NAME ||= "novalink-feedback-discourse-plugin".freeze
 
     class Engine < ::Rails::Engine
-      engine_name DiscourseTemplates::PLUGIN_NAME
-      isolate_namespace DiscourseTemplates
+      engine_name NovalinkFeedbackDiscoursePlugin::PLUGIN_NAME
+      isolate_namespace NovalinkFeedbackDiscoursePlugin
     end
   end
   # secure_headers 설정을 수정하여 X-Frame-Options 및 CSP의 frame-ancestors 지시어를 변경합니다.
