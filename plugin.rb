@@ -26,48 +26,53 @@ after_initialize do
   #   same_site: :none,
   #   secure: true
 
- # Use Discourse's event system to modify headers after each action
- on(:before_send_headers) do |controller|
-  if controller.response.headers["Content-Security-Policy"].present?
-    # Modify existing Content-Security-Policy header
-    current_csp = controller.response.headers["Content-Security-Policy"]
+#  # Use Discourse's event system to modify headers after each action
+#  on(:before_send_headers) do |controller|
+#   if controller.response.headers["Content-Security-Policy"].present?
+#     # Modify existing Content-Security-Policy header
+#     current_csp = controller.response.headers["Content-Security-Policy"]
     
-    # Replace or add frame-ancestors directive
-    if current_csp.include?("frame-ancestors")
-      current_csp = current_csp.gsub(
-        /frame-ancestors[^;]*;/,
-        "frame-ancestors 'self' http://localhost http://localhost:5173;"
-      )
-    else
-      current_csp += " frame-ancestors 'self' http://localhost http://localhost:5173;"
-    end
+#     # Replace or add frame-ancestors directive
+#     if current_csp.include?("frame-ancestors")
+#       current_csp = current_csp.gsub(
+#         /frame-ancestors[^;]*;/,
+#         "frame-ancestors 'self' http://localhost http://localhost:5173;"
+#       )
+#     else
+#       current_csp += " frame-ancestors 'self' http://localhost http://localhost:5173;"
+#     end
 
-    # Make sure default-src includes our domains
-    if current_csp.include?("default-src")
-      if !current_csp.include?("default-src") || 
-         !(current_csp.include?("http://localhost") && current_csp.include?("http://localhost:5173"))
-        # Add our domains to default-src if they're not already there
-        current_csp = current_csp.gsub(
-          /default-src([^;]*);/,
-          "default-src\\1 http://localhost http://localhost:5173;"
-        )
-      end
-    else
-      current_csp += " default-src 'self' http://localhost http://localhost:5173;"
-    end
+#     # Make sure default-src includes our domains
+#     if current_csp.include?("default-src")
+#       if !current_csp.include?("default-src") || 
+#          !(current_csp.include?("http://localhost") && current_csp.include?("http://localhost:5173"))
+#         # Add our domains to default-src if they're not already there
+#         current_csp = current_csp.gsub(
+#           /default-src([^;]*);/,
+#           "default-src\\1 http://localhost http://localhost:5173;"
+#         )
+#       end
+#     else
+#       current_csp += " default-src 'self' http://localhost http://localhost:5173;"
+#     end
     
-    # Update the header
-    controller.response.headers["Content-Security-Policy"] = current_csp
-  else
-    # Set a new Content-Security-Policy header if none exists
-    controller.response.headers["Content-Security-Policy"] = 
-      "frame-ancestors 'self' http://localhost http://localhost:5173; default-src 'self' http://localhost http://localhost:5173;"
-  end
+#     # Update the header
+#     controller.response.headers["Content-Security-Policy"] = current_csp
+#   else
+#     # Set a new Content-Security-Policy header if none exists
+#     controller.response.headers["Content-Security-Policy"] = 
+#       "frame-ancestors 'self' http://localhost http://localhost:5173; default-src 'self' http://localhost http://localhost:5173;"
+#   end
 
-  # Always set X-Frame-Options
-  controller.response.headers["X-Frame-Options"] = "ALLOW-FROM http://localhost"
+#   # Always set X-Frame-Options
+#   controller.response.headers["X-Frame-Options"] = "ALLOW-FROM http://localhost"
   
-  Rails.logger.debug "Modified security headers: #{controller.response.headers["Content-Security-Policy"]}"
+#   Rails.logger.debug "Modified security headers: #{controller.response.headers["Content-Security-Policy"]}"
+
+  Rails.application.config.action_dispatch.default_headers.merge!({'X-Frame-Options' => 'ALLOWALL'})
+  Rails.application.config.action_dispatch.default_headers.merge!({'Access-Control-Allow-Origin' => '*'})
+  Rails.application.config.action_dispatch.default_headers.merge!({'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS, DELETE'})
+  Rails.application.config.action_dispatch.default_headers.merge!({'Access-Control-Allow-Headers' => 'Content-Type, Authorization, X-Requested-With'})
 end
 
 Rails.logger.info "Novalink Feedback plugin initialized successfully"
