@@ -3,7 +3,7 @@
 # author: Thenurim
 # version: 0.1
 
-after_initialize do
+# after_initialize do
 
   # secure_headers 설정을 수정하여 X-Frame-Options 및 CSP의 frame-ancestors 지시어를 변경합니다.
   
@@ -75,4 +75,4 @@ after_initialize do
   Rails.application.config.action_dispatch.default_headers.merge!({'Access-Control-Allow-Headers' => 'Content-Type, Authorization, X-Requested-With'})
 
   Rails.logger.info "Novalink Feedback plugin initialized successfully"
-end
+# end
