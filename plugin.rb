@@ -26,14 +26,34 @@ after_initialize do
   #   same_site: :none,
   #   secure: true
 
-  # Add our custom directives to the Content Security Policy
-  ::ContentSecurityPolicy.policy.directives['frame-ancestors'] = "'self' http://localhost http://localhost:5173"
-  ::ContentSecurityPolicy.policy.directives['default-src'] = "'self' http://localhost http://localhost:5173"
-  
-  # Set X-Frame-Options header via Rails default headers
-  Rails.configuration.action_dispatch.default_headers.merge!({
-    'X-Frame-Options' => 'ALLOW-FROM http://localhost'
-  })
-  
-  Rails.logger.info "Novalink Feedback plugin initialized with security headers for localhost"
+  Rails.logger.info "Initializing Novalink Feedback plugin to modify security headers..."
+
+  # Monkey patch ApplicationController to add our headers
+  ::ApplicationController.class_eval do
+    # Store the original method reference
+    alias_method :orig_append_content_security_policy_header, :append_content_security_policy_header
+
+    # Override the method to add our custom policies
+    def append_content_security_policy_header
+      # Call original method first
+      orig_append_content_security_policy_header
+
+      # Add our custom frame-ancestors and default-src directives
+      response.headers["Content-Security-Policy"] = response.headers["Content-Security-Policy"].to_s.gsub(
+        /frame-ancestors[^;]*;/,
+        "frame-ancestors 'self' http://localhost http://localhost:5173;"
+      )
+
+      if !response.headers["Content-Security-Policy"].to_s.include?("frame-ancestors")
+        response.headers["Content-Security-Policy"] = "#{response.headers["Content-Security-Policy"]} frame-ancestors 'self' http://localhost http://localhost:5173;"
+      end
+
+      # Set X-Frame-Options
+      response.headers["X-Frame-Options"] = "ALLOW-FROM http://localhost"
+
+      Rails.logger.debug "Modified security headers: #{response.headers["Content-Security-Policy"]}"
+    end
+  end
+
+  Rails.logger.info "Novalink Feedback plugin initialized successfully"
 end
