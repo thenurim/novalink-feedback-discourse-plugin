@@ -1,3 +1,7 @@
+# name: novalink-feedback-discourse
+# about: Discourse header plugin for Novalink Feedback
+# author: Thenurim
+# version: 0.1
 
 after_initialize do
   module NovalinkFeedbackDiscourse
