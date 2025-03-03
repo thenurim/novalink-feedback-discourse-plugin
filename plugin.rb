@@ -26,42 +26,14 @@ after_initialize do
   #   same_site: :none,
   #   secure: true
 
-# CSP middleware to add our security headers
-  class NovalinkFeedbackSecurityHeadersMiddleware
-    def initialize(app)
-      @app = app
-    end
-
-    def call(env)
-      status, headers, response = @app.call(env)
-      
-      # Set X-Frame-Options (note: modern browsers prefer CSP frame-ancestors)
-      # X-Frame-Options doesn't support multiple origins, using ALLOW-FROM with first URL
-      headers['X-Frame-Options'] = 'ALLOW-FROM http://localhost'
-
-      # Get existing CSP header or create a new one
-      csp = headers['Content-Security-Policy'] || ''
-      
-      # Add frame-ancestors directive to allow localhost and localhost:5173
-      unless csp.include?('frame-ancestors')
-        csp += " frame-ancestors 'self' http://localhost http://localhost:5173;"
-      end
-      
-      # Add default-src directive 
-      unless csp.include?('default-src')
-        csp += " default-src 'self' http://localhost http://localhost:5173;"
-      end
-      
-      # Update the header
-      headers['Content-Security-Policy'] = csp.strip
-      
-      [status, headers, response]
-    end
-  end
-
-  # Insert the middleware
-  Rails.application.config.middleware.use NovalinkFeedbackSecurityHeadersMiddleware
-
-  # Optional: Log that the plugin has been initialized
-  Rails.logger.info "Novalink Feedback plugin initialized with hardcoded values for localhost"
+  # Add our custom directives to the Content Security Policy
+  ::ContentSecurityPolicy.policy.directives['frame-ancestors'] = "'self' http://localhost http://localhost:5173"
+  ::ContentSecurityPolicy.policy.directives['default-src'] = "'self' http://localhost http://localhost:5173"
+  
+  # Set X-Frame-Options header via Rails default headers
+  Rails.configuration.action_dispatch.default_headers.merge!({
+    'X-Frame-Options' => 'ALLOW-FROM http://localhost'
+  })
+  
+  Rails.logger.info "Novalink Feedback plugin initialized with security headers for localhost"
 end
