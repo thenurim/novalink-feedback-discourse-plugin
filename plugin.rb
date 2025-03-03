@@ -60,7 +60,7 @@ after_initialize do
   end
 
   # Insert the middleware
-  Rails.application.middleware.insert_before ActionDispatch::Static, NovalinkFeedbackSecurityHeadersMiddleware
+  Rails.application.config.middleware.use NovalinkFeedbackSecurityHeadersMiddleware
 
   # Optional: Log that the plugin has been initialized
   Rails.logger.info "Novalink Feedback plugin initialized with hardcoded values for localhost"
