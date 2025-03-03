@@ -1,14 +1,14 @@
-module ::NovalinkFeedbackDiscourse
-  PLUGIN_NAME ||= "novalink-feedback-discourse-plugin".freeze
-
-  # class Engine < ::Rails::Engine
-  #   engine_name NovalinkFeedbackDiscourse::PLUGIN_NAME
-  #   isolate_namespace NovalinkFeedbackDiscourse
-  # end
-end
 
 after_initialize do
-  # secure_headers 설정을 수정하여 X-Frame-Options 및 CSP의 frame-ancestors 지시어를 변경합니다.
+  module NovalinkFeedbackDiscourse
+    # PLUGIN_NAME ||= "novalink-feedback-discourse".freeze
+    PLUGIN_NAME = "novalink-feedback-discourse"
+  
+    # class Engine < ::Rails::Engine
+    #   engine_name NovalinkFeedbackDiscourse::PLUGIN_NAME
+    #   isolate_namespace NovalinkFeedbackDiscourse
+    # end
+      # secure_headers 설정을 수정하여 X-Frame-Options 및 CSP의 frame-ancestors 지시어를 변경합니다.
   # SecureHeaders::Configuration.default.tap do |config|
   #   # X-Frame-Options 헤더를 수정 (주의: ALLOW-FROM은 일부 브라우저에서 지원하지 않습니다)
   #   #config.x_frame_options = "ALLOW-FROM http://localhost"
@@ -23,8 +23,11 @@ after_initialize do
   #   config.csp[:default_src] = ["'self'", "http://localhost:5173"]
   # end
 
-  Rails.application.config.session_store :cookie_store,
+    Rails.application.config.session_store :cookie_store,
     key: '_discourse_session',
     same_site: :none,
     secure: true
+  end
+  
+
 end
