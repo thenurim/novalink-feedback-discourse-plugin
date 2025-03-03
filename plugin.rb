@@ -1,12 +1,13 @@
-after_initialize do
-  module ::NovalinkFeedbackDiscoursePlugin
-    PLUGIN_NAME ||= "novalink-feedback-discourse-plugin".freeze
+module ::NovalinkFeedbackDiscourse
+  PLUGIN_NAME ||= "novalink-feedback-discourse-plugin".freeze
 
-    class Engine < ::Rails::Engine
-      engine_name NovalinkFeedbackDiscoursePlugin::PLUGIN_NAME
-      isolate_namespace NovalinkFeedbackDiscoursePlugin
-    end
-  end
+  # class Engine < ::Rails::Engine
+  #   engine_name NovalinkFeedbackDiscourse::PLUGIN_NAME
+  #   isolate_namespace NovalinkFeedbackDiscourse
+  # end
+end
+
+after_initialize do
   # secure_headers 설정을 수정하여 X-Frame-Options 및 CSP의 frame-ancestors 지시어를 변경합니다.
   # SecureHeaders::Configuration.default.tap do |config|
   #   # X-Frame-Options 헤더를 수정 (주의: ALLOW-FROM은 일부 브라우저에서 지원하지 않습니다)
