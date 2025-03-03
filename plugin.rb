@@ -65,22 +65,3 @@ after_initialize do
   # Optional: Log that the plugin has been initialized
   Rails.logger.info "Novalink Feedback plugin initialized with hardcoded values for localhost"
 end
-
-# Controller to test the headers (optional, using correct controller inheritance)
-module ::NovalinkFeedback
-  class SecHeadersController < ::ApplicationController
-    requires_plugin 'novalink-feedback-discourse-plugin'
-    skip_before_action :check_xhr, :redirect_to_login_if_required
-
-    def index
-      render plain: "Novalink Feedback security headers test page - Headers are set to allow http://localhost and http://localhost:5173"
-    end
-  end
-end
-
-# Only add the routes if the plugin is enabled
-if defined?(NovalinkFeedback)
-  Discourse::Application.routes.append do
-    get '/novalink_feedback_test' => 'novalink_feedback/sec_headers#index'
-  end
-end
