@@ -73,7 +73,6 @@ after_initialize do
   Rails.application.config.action_dispatch.default_headers.merge!({'Access-Control-Allow-Origin' => '*'})
   Rails.application.config.action_dispatch.default_headers.merge!({'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS, DELETE'})
   Rails.application.config.action_dispatch.default_headers.merge!({'Access-Control-Allow-Headers' => 'Content-Type, Authorization, X-Requested-With'})
-end
 
-Rails.logger.info "Novalink Feedback plugin initialized successfully"
+  Rails.logger.info "Novalink Feedback plugin initialized successfully"
 end
