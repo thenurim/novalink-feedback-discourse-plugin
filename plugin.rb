@@ -7,7 +7,9 @@ Rails.application.config.action_dispatch.default_headers.merge!({'X-Frame-Option
 Rails.application.config.action_dispatch.default_headers.merge!({'Access-Control-Allow-Origin' => '*'})
 Rails.application.config.action_dispatch.default_headers.merge!({'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS, DELETE'})
 Rails.application.config.action_dispatch.default_headers.merge!({'Access-Control-Allow-Headers' => 'Content-Type, Authorization, X-Requested-With'})
-Rails.application.config.action_dispatch.default_headers.merge!({'Content-Security-Policy' => "default-src 'self' http://localhost http://localhost:5173; frame-ancestors 'self' http://localhost http://localhost:5173;"})
+after_initialize do
+  Rails.application.config.action_dispatch.default_headers.merge!({'Content-Security-Policy' => "base-uri 'self'; object-src 'none'; manifest-src 'self'; frame-ancestors 'self' http://localhost http://localhost:5173; default-src 'self' http://localhost http://localhost:5173"})
+end
 
 
 # # Content-Security-Policy 헤더를 위한 이벤트 설정
